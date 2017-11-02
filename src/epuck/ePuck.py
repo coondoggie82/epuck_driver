@@ -441,8 +441,14 @@ class ePuck():
             self._debug('Already connected')
             return False
         try:
+            print "*****BT: " , bluetooth.RFCOMM
             self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+            print "Address: " , self.address
+            print "Valid: " , bluetooth.is_valid_address(self.address)
+            print "Sockname: " , self.socket.getsockname()
+            #print "Bind: " , self.socket.bind((self.address, 0))
             self.socket.connect((self.address, 1))
+            print "Connected"
             self.socket.settimeout(0.5)
 
         except Exception, e:
