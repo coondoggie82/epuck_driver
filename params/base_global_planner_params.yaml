@@ -1,0 +1,3 @@
+NavfnROS:
+  visualize_potential: false
+  use_dijkstra: false
