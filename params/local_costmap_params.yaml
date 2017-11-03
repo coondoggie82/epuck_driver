@@ -1,10 +1,11 @@
 local_costmap:
-  global_frame: /odom
+  global_frame: /map
   robot_base_frame: epuck_robot_0/base_link
-  update_frequency: 5.0
-  publish_frequency: 2.0
+  update_frequency: 3.0
+  publish_frequency: 3.0
   static_map: false
   rolling_window: true
   width: 0.2
   height: 0.2
-  resolution: 0.005
+  resolution: 0.01
+  transform_tolerance: 1.0

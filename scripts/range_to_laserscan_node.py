@@ -168,7 +168,7 @@ class RangeToLaserScanNode:
 
     # scanner fixed start, end, and increment angles (radians)
     self.msgScanFixed.angle_min       = 0.0
-    self.msgScanFixed.angle_max       = 2.0 * math.pi - self.angleInc
+    self.msgScanFixed.angle_max       = 2.0 * math.pi #- self.angleInc #WGC
     self.msgScanFixed.angle_increment = self.angleInc
 
     # scanner fixed measurement and scan intervals (seconds)
@@ -316,7 +316,7 @@ if __name__ == '__main__':
   #
   # ROS Parameter Server parameters for this node
   #
-  epuck_name = rospy.get_param(nodenamespace + "/epuck_name", "epuck")
+  epuck_name = rospy.get_param(nodenamespace + "/epuck_name", "epuck_robot_0")
   angle_inc  = rospy.get_param(nodenamespace + "/angle_inc", math.radians(10.0))
 
   node = RangeToLaserScanNode(epuck_name=epuck_name, angle_inc=angle_inc)

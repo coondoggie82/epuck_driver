@@ -3,10 +3,10 @@ raytrace_range: 0.03
 footprint: [[-0.0035, 0.0035], [0.0035, 0.0035], [0.0035, -0.0035], [-0.0035, -0.0035]]
 inflation_radius: 0.01
 
-#observation_sources: #proximity_sensor
+observation_sources: laser_scan_sensor
 
 #pointcloud_scan_sensor: {sensor_frame: base_footprint, data_type: LaserScan, topic: /scan_from_pointcloud, marking: true, clearing: false}
 
-#laser_scan_sensor: {sensor_frame: laser_0, data_type: LaserScan, topic: /scan, marking: true, clearing: false}
+laser_scan_sensor: {sensor_frame: epuck_robot_0/scan, data_type: LaserScan, topic: /scan, marking: true, clearing: false}
 
-proximity_sensor: {sensor_frame: epuck_robot_0/base_prox0, data_type: Range, topic: /proximity0, marking: true, clearing: true}
+#proximity_sensor: {sensor_frame: epuck_robot_0/base_prox0, data_type: Range, topic: /proximity0, marking: true, clearing: true}

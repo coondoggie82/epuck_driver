@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="epuck_address"/>
+    <arg name="epuck_address" default="10:00:E8:D3:AA:64"/>
     <arg name="epuck_name" default="epuck_robot_0"/>
     <arg name="cam_en" default="false"/>
     <arg name="acc_en" default="true"/>
