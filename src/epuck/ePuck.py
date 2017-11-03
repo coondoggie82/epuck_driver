@@ -411,18 +411,20 @@ class ePuck():
                 pass
 
             else:
-                reply = self.send_and_receive(s).split(",")
+                try:
+                    reply = self.send_and_receive(s).split(",")
 
-                t = reply[0]
-                response = tuple(reply[1:len(reply)])
+                    t = reply[0]
+                    response = tuple(reply[1:len(reply)])
 
-                if t == "c":
-                    # Selector
-                    self._selector = response[0]
+                    if t == "c":
+                        # Selector
+                        self._selector = response[0]
 
-                else:
-                    self._debug('Unknow type of sensor to read' + str(reply))
-
+                    else:
+                        self._debug('Unknow type of sensor to read' + str(reply))
+                except:
+                    pass
 
     #
     # Public methods

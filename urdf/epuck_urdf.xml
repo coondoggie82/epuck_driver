@@ -67,4 +67,21 @@
         <origin xyz="0.0 0.0 0.037"/>
     </joint>
 
+    <link name="scan">
+        <visual>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="green_pcb">
+                <color rgba="0.23 0.4 0.16 1.0"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="base_to_scan" type="fixed">
+        <parent link="base_link"/>
+        <child link="scan"/>
+        <origin xyz="0.0 0.0 0.034"/>
+    </joint>
+
 </robot>
