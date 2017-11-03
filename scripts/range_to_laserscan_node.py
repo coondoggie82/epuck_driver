@@ -37,7 +37,7 @@ ProximityHeight = 0.034   # height of proximity sensors from base (meters)
 # needed.
 # 
 # For the e-puck, x points forward, y to the left. By sensors ids, the sensors
-# are arranged clockwise. We want couter-clockwise.
+# are arranged clockwise. We want counter-clockwise.
 #
 ProximityIds = [
   'proximity7', 'proximity6', 'proximity5', 'proximity4',
@@ -71,8 +71,8 @@ class RangeToLaserScanNode:
     self.epuckName = epuck_name # epuck name and subscribed topic namespace
     self.angleInc  = angle_inc  # scanner angle increment in radians
 
-    # range measurement with r is the range, m is the maximum
-    self.meas = lambda r, m: r if (r is not None) else 2.0 * m
+    # range most recent measurement with r = range or None, m = maximum range
+    self.mrm = lambda r, m: r if (r is not None) else 2.0 * m
 
     print 'DBG: epuck_name =', self.epuckName
     print 'DBG: angle_inc  =', math.degrees(self.angleInc)
@@ -228,8 +228,8 @@ class RangeToLaserScanNode:
       wt0, wt1 = interp.itervalues()    # range sensor weights
 
       # range sensor most recent measurements
-      r0 = self.meas(ProximitySensors[id0]['range'], self.rangeMax)
-      r1 = self.meas(ProximitySensors[id1]['range'], self.rangeMax)
+      r0 = self.mrm(ProximitySensors[id0]['range'], self.rangeMax)
+      r1 = self.mrm(ProximitySensors[id1]['range'], self.rangeMax)
       
       # interpolated scan measurement
       msgScan.ranges.append(EPuckRadius + wt0 * r0 + wt1 * r1)
