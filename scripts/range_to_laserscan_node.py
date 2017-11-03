@@ -16,9 +16,24 @@
 #     - The virtual laser scanner angle increment (radians).
 #       Default: 10 degrees in radians.
 #
+# The e-puck proximity positions (cm), x pointing forward, y pointing left:
+#                     [FRONT]
+#           P7(3.5, 1.0)   P0(3.5, -1.0)
+#       P6(2.5, 2.5)           P1(2.5, -2.5)
+#   P5(0.0, 3.0)                   P2(0.0, -3.0)
+#       P4(-3.5, 2.0)          P3(-3.5, -2.0)
+#
+# The e-puck proximity orentations (degrees):
+#               [FRONT]
+#           P7(10)   P0(350)
+#       P6(40)           P1(320)
+#   P5(90)                   P2(270)
+#       P4(160)          P3(200)
+#
 
 import math
 import time
+import random
 from copy import deepcopy
 import rospy
 from sensor_msgs.msg import Range
@@ -72,7 +87,7 @@ class RangeToLaserScanNode:
     self.angleInc  = angle_inc  # scanner angle increment in radians
 
     # range most recent measurement with r = range or None, m = maximum range
-    self.mrm = lambda r, m: r if (r is not None) else 2.0 * m
+    self.mrm = lambda r, m: r if (r is not None) else m + 0.001
 
     print 'DBG: epuck_name =', self.epuckName
     print 'DBG: angle_inc  =', math.degrees(self.angleInc)
@@ -97,17 +112,42 @@ class RangeToLaserScanNode:
 
   ##
   def updateRangeData(self, msgRange, sensorId):
-    #print 'DBG:', sensorId
     if ProximitySensors.has_key(sensorId):
       ProximitySensors[sensorId]['range'] = msgRange.range
+      #print 'DBG: update:', sensorId, ProximitySensors[sensorId]['range']
       if self.msgScanFixed is None:
+        #print 'DBG: First Range Message'
+        #print 'DBG:', msgRange,
         self.rangeMin = msgRange.min_range
         self.rangeMax = msgRange.max_range
         self.initScanFixed(msgRange)
-        #print 'DBG: First Range Message'
-        #print 'DBG:', msgRange,
-        #print 'DBG: Fixed Scan Message'
-        #print 'DBG:', self.msgScanFixed
+
+  ##
+  def utProximitySynth(self):
+    rmin = 0.005
+    rmax = 0.05
+    rnil = rmax + 0.001
+
+    msgRange = Range()
+    msgRange.min_range = rmin
+    msgRange.max_range = rmax
+
+    # randomly walk the proximity sensor measurments
+    for sensorId in ProximityIds:
+      rdir = random.randint(-1, 1)  # [-1, 0, 1]
+      if rdir == 0:
+        continue
+      rdel = random.random() * (rmax - rmin)
+      r = ProximitySensors[sensorId]['range']
+      if r is None:
+        r = rnil
+      r = r + rdir * rdel
+      if r < rmin:
+        r = rmin
+      elif r > rmax:
+        r = rnil
+      msgRange.range = r
+      self.updateRangeData(msgRange, sensorId)
 
   ##
   def initScanFixed(self, msgRange):
@@ -142,6 +182,9 @@ class RangeToLaserScanNode:
     # measurements
     self.msgScanFixed.ranges      = []  # range (meters)
     self.msgScanFixed.intensities = []  # not used
+
+    #print 'DBG: Fixed Scan Message'
+    #print 'DBG:', self.msgScanFixed
 
   ##
   def calcIterpParams(self, a):
@@ -223,16 +266,32 @@ class RangeToLaserScanNode:
     #
     # "Scan"
     #
+    a = msgScan.angle_min
     for interp in self.proximityToLaserInterp:
-      id0, id1 = interp.iterkeys()      # range sensor ids
-      wt0, wt1 = interp.itervalues()    # range sensor weights
+      p, q = interp.iteritems()         # (idx, wtx), (idy, wty)
+
+      id0, wt0 = p
+      id1, wt1 = q
 
       # range sensor most recent measurements
       r0 = self.mrm(ProximitySensors[id0]['range'], self.rangeMax)
       r1 = self.mrm(ProximitySensors[id1]['range'], self.rangeMax)
       
+      # weighted range value at angle
+      r = wt0 * r0 + wt1 * r1
+
+      #print "DBG: interpProximity:"
+      #print "DBG:   {0}({1}) - scan({2}) - {3}({4})".format(
+      #    id0, math.degrees(ProximitySensors[id0]['cob']),
+      #    math.degrees(a),
+      #    id1, math.degrees(ProximitySensors[id1]['cob']))
+      #print "DBG:   {0} = {1} * {2} + {3} * {4}".format(
+      #    r, wt0, r0, wt1, r1)
+
       # interpolated scan measurement
-      msgScan.ranges.append(EPuckRadius + wt0 * r0 + wt1 * r1)
+      msgScan.ranges.append(EPuckRadius + r)
+
+      a += self.msgScanFixed.angle_increment
 
     # and publish
     self.pubLaserScan.publish(msgScan)
@@ -247,6 +306,7 @@ class RangeToLaserScanNode:
     rate = rospy.Rate(10) # 10hz
 
     while not rospy.is_shutdown():
+      #self.utProximitySynth()
       self.publish()
       rate.sleep()
 
